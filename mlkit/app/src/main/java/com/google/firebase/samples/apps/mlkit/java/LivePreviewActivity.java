@@ -23,6 +23,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -65,6 +67,9 @@ public final class LivePreviewActivity extends AppCompatActivity
     super.onCreate(savedInstanceState);
     Log.d(TAG, "onCreate");
 
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
     setContentView(R.layout.activity_live_preview);
 
     preview = (CameraSourcePreview) findViewById(R.id.firePreview);
@@ -76,20 +81,22 @@ public final class LivePreviewActivity extends AppCompatActivity
       Log.d(TAG, "graphicOverlay is null");
     }
 
-    Spinner spinner = (Spinner) findViewById(R.id.spinner);
-    List<String> options = new ArrayList<>();
-    options.add(FACE_DETECTION);
-    options.add(CLASSIFICATION);
-    // Creating adapter for spinner
-    ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_style, options);
-    // Drop down layout style - list view with radio button
-    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    // attaching data adapter to spinner
-    spinner.setAdapter(dataAdapter);
-    spinner.setOnItemSelectedListener(this);
 
-    ToggleButton facingSwitch = (ToggleButton) findViewById(R.id.facingSwitch);
-    facingSwitch.setOnCheckedChangeListener(this);
+    // TODO classification
+    //Spinner spinner = (Spinner) findViewById(R.id.spinner);
+    //List<String> options = new ArrayList<>();
+    //options.add(FACE_DETECTION);
+    //options.add(CLASSIFICATION);
+    // Creating adapter for spinner
+    //ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_style, options);
+    // Drop down layout style - list view with radio button
+    //dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    // attaching data adapter to spinner
+    //spinner.setAdapter(dataAdapter);
+    //spinner.setOnItemSelectedListener(this);
+
+    //ToggleButton facingSwitch = (ToggleButton) findViewById(R.id.facingSwitch);
+    //facingSwitch.setOnCheckedChangeListener(this);
 
     if (allPermissionsGranted()) {
       createCameraSource(selectedModel);
