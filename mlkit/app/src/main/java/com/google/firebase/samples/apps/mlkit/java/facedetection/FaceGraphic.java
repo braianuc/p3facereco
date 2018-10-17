@@ -148,8 +148,6 @@ public class FaceGraphic extends Graphic {
     canvas.drawText("Face ID: " + face.getTrackingId(), x + ID_X_OFFSET, bottom + ID_Y_OFFSET, idPaint);
   }
 
-
-
   //<editor-fold>
   /*
   private void drawLandmarkPosition(Canvas canvas, FirebaseVisionFace face, int landmarkID) {
