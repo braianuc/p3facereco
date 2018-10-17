@@ -36,11 +36,8 @@ import com.google.firebase.samples.apps.mlkit.R;
 import com.google.firebase.samples.apps.mlkit.common.CameraSource;
 import com.google.firebase.samples.apps.mlkit.common.CameraSourcePreview;
 import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
-import com.google.firebase.samples.apps.mlkit.java.barcodescanning.BarcodeScanningProcessor;
 import com.google.firebase.samples.apps.mlkit.java.custommodel.CustomImageClassifierProcessor;
 import com.google.firebase.samples.apps.mlkit.java.facedetection.FaceDetectionProcessor;
-import com.google.firebase.samples.apps.mlkit.java.imagelabeling.ImageLabelingProcessor;
-import com.google.firebase.samples.apps.mlkit.java.textrecognition.TextRecognitionProcessor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,9 +51,6 @@ public final class LivePreviewActivity extends AppCompatActivity
         OnItemSelectedListener,
         CompoundButton.OnCheckedChangeListener {
   private static final String FACE_DETECTION = "Face Detection";
-  private static final String TEXT_DETECTION = "Text Detection";
-  private static final String BARCODE_DETECTION = "Barcode Detection";
-  private static final String IMAGE_LABEL_DETECTION = "Label Detection";
   private static final String CLASSIFICATION = "Classification";
   private static final String TAG = "LivePreviewActivity";
   private static final int PERMISSION_REQUESTS = 1;
