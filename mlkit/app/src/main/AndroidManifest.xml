@@ -18,15 +18,7 @@
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="barcode,face,ocr,ica" />
 
-        <activity
-            android:name="com.google.firebase.samples.apps.mlkit.java.ChooserActivity"/>
-
-        <activity
-            android:name="com.google.firebase.samples.apps.mlkit.kotlin.ChooserActivity"/>
-
-
-        <activity
-            android:name="com.google.firebase.samples.apps.mlkit.EntryChoiceActivity"
+        <activity android:name=".java.LivePreviewActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -35,11 +27,6 @@
             </intent-filter>
         </activity>
 
-
-        <activity android:name=".java.LivePreviewActivity" android:exported="true">
-        </activity>
-
-        <activity android:name=".kotlin.LivePreviewActivity" android:exported="true"/>
     </application>
 
 </manifest>
