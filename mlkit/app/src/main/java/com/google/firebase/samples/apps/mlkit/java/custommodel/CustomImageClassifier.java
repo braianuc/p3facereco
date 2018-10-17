@@ -63,7 +63,7 @@ public class CustomImageClassifier {
   private static final String LOCAL_MODEL_PATH = "mobilenet_quant_v1_224.tflite";
 
   /** Name of the model uploaded to the Firebase console. */
-  private static final String HOSTED_MODEL_NAME = "mobilenet_v1";
+  //private static final String HOSTED_MODEL_NAME = "mobilenet_v1";
 
   /** Name of the label file stored in Assets. */
   private static final String LABEL_PATH = "labels.txt";
@@ -105,26 +105,26 @@ public class CustomImageClassifier {
   CustomImageClassifier(Activity activity) throws FirebaseMLException {
     FirebaseModelOptions modelOptions =
         new FirebaseModelOptions.Builder()
-            .setCloudModelName(HOSTED_MODEL_NAME)
+            //.setCloudModelName(HOSTED_MODEL_NAME)
             .setLocalModelName(LOCAL_MODEL_NAME)
-            .build();
-    FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions
-            .Builder()
-            .requireWifi()
             .build();
     FirebaseLocalModelSource localModelSource =
             new FirebaseLocalModelSource.Builder(LOCAL_MODEL_NAME)
                     .setAssetFilePath(LOCAL_MODEL_PATH).build();
-    FirebaseCloudModelSource cloudSource = new FirebaseCloudModelSource.Builder
+    /*FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions
+            .Builder()
+            .requireWifi()
+            .build();
+    /*FirebaseCloudModelSource cloudSource = new FirebaseCloudModelSource.Builder
             (HOSTED_MODEL_NAME)
             .enableModelUpdates(true)
             .setInitialDownloadConditions(conditions)
             .setUpdatesDownloadConditions(conditions)  // You could also specify different
             // conditions for updates.
-            .build();
+            .build();*/
     FirebaseModelManager manager = FirebaseModelManager.getInstance();
     manager.registerLocalModelSource(localModelSource);
-    manager.registerCloudModelSource(cloudSource);
+    //manager.registerCloudModelSource(cloudSource);
     interpreter = FirebaseModelInterpreter.getInstance(modelOptions);
     labelList = loadLabelList(activity);
     Log.d(TAG, "Created a Custom Image Classifier.");
