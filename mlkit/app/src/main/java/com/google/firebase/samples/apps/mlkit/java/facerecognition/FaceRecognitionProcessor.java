@@ -32,12 +32,13 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
- * Classifies images with Tensorflow Lite.
+ * Recognize (classify) faces with TF Lite
  */
 public class FaceRecognitionProcessor {
 
@@ -105,7 +106,7 @@ public class FaceRecognitionProcessor {
     private PriorityQueue<Map.Entry<String, Float>> sortedLabels =
             new PriorityQueue<>(
                     RESULTS_TO_SHOW,
-                    (o1, o2) -> (o1.getValue()).compareTo(o2.getValue()));
+                    Comparator.comparing(o -> (o.getValue())));
 
     /**
      * Initializes an {@code ImageClassifier}.
@@ -128,7 +129,7 @@ public class FaceRecognitionProcessor {
             Log.e(TAG, "Image classifier has not been initialized; Skipped.");
             return "Uninitialized Classifier.";
         }
-        if(bitmap.isRecycled()) {
+        if (bitmap.isRecycled()) {
             System.out.println("Bitmap recycled prematurely, skipping frame...");
             return "";
         }
@@ -232,7 +233,6 @@ public class FaceRecognitionProcessor {
     }
 
 
-
     /**
      * Prints the label and its confidence level
      */
@@ -247,8 +247,8 @@ public class FaceRecognitionProcessor {
         //String textToShow = "";
         //final int size = sortedLabels.size();
         //for (int i = 0; i < size; ++i) {
-            Map.Entry<String, Float> label = sortedLabels.poll();
-            String textToShow = String.format("\n%s (%.0f%%)", label.getKey().substring(0, 1).toUpperCase() + label.getKey().substring(1), label.getValue() * 100); // + textToShow
+        Map.Entry<String, Float> label = sortedLabels.poll();
+        String textToShow = String.format("\n%s (%.0f%%)", label.getKey().substring(0, 1).toUpperCase() + label.getKey().substring(1), label.getValue() * 100); // + textToShow
         //}
         return textToShow;
     }

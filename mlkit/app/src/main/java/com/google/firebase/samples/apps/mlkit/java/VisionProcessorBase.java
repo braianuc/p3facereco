@@ -15,22 +15,15 @@ package com.google.firebase.samples.apps.mlkit.java;
 
 import android.graphics.Bitmap;
 import android.media.Image;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
-import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.samples.apps.mlkit.common.FrameMetadata;
 import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
 import com.google.firebase.samples.apps.mlkit.common.VisionImageProcessor;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -81,8 +74,6 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
 
     /**
      * Detects feature from given media.Image
-     *
-     * @return created FirebaseVisionImage
      */
     @Override
     public void process(Image image, int rotation, final GraphicOverlay graphicOverlay) {

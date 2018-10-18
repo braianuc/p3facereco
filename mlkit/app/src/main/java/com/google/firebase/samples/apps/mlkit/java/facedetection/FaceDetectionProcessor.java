@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// -- Altered version
 package com.google.firebase.samples.apps.mlkit.java.facedetection;
 
 import android.app.Activity;
@@ -19,7 +20,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -35,8 +35,6 @@ import com.google.firebase.samples.apps.mlkit.java.VisionProcessorBase;
 import com.google.firebase.samples.apps.mlkit.java.facerecognition.FaceRecognitionProcessor;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -123,12 +121,22 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
         });
     }
 
+    /**
+     * Triggered when face detection failed to process
+     * @param e exception thrown
+     */
     @Override
     protected void onFailure(@NonNull Exception e) {
         Log.e(TAG, "Face detection failed " + e);
     }
 
 
+    /**
+     * Process the data coming from the camera and create a bitmap from it.
+     * @param data cam data
+     * @param frameMetadata firebase frame metadata
+     * @param graphicOverlay the graphic overlay from our layout
+     */
     @Override
     public void process(ByteBuffer data, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay) {
         super.process(data, frameMetadata, graphicOverlay);
@@ -141,7 +149,7 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
      * Resizes image data from {@code ByteBuffer}.
      */
     private Bitmap createResizedBitmap(ByteBuffer buffer, int width, int height) {
-        YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null);
+        YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null); // Producing onFlyCompress
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         img.compressToJpeg(new Rect(0, 0, img.getWidth(), img.getHeight()), 50, out);
         byte[] imageBytes = out.toByteArray();
