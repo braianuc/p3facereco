@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.firebase.samples.apps.mlkit">
+    package="com.p3ds.facereco">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -14,11 +14,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/MaterialTheme">
-        <meta-data
-            android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-            android:value="barcode,face,ocr,ica" />
-
-        <activity android:name=".java.LivePreviewActivity"
+        <activity android:name="com.p3ds.facereco.java.LivePreviewActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
