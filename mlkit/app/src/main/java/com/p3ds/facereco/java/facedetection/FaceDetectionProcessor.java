@@ -107,7 +107,12 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
                 if (y + height > bitmap.getHeight()) {
                     height = bitmap.getHeight() - y;
                 }
-                Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x < 0 ? 0 : x, y < 0 ? 0 : y, width, height);
+                if(y + height <= bitmap.getHeight() && x + width <= bitmap.getWidth()) {
+                    Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x < 0 ? 0 : x, y < 0 ? 0 : y, width, height);
+                    result = processor.classifyFrame(croppedFaceBmp);
+                } else {
+                    Log.e(TAG, "Unable to crop bitmap, skipping frame...");
+                }
                 /*String path = Environment.getExternalStorageDirectory().toString() + "/croppedFaceBmpxx" + face.getTrackingId() + ".jpg";
                 try (FileOutputStream out = new FileOutputStream(new File(path))) {
                     croppedFaceBmp.compress(Bitmap.CompressFormat.PNG, 100, out);
@@ -115,7 +120,6 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
                 } catch (IOException e) {
                     e.printStackTrace();
                 }*/
-                result = processor.classifyFrame(croppedFaceBmp);
             }
             faceGraphic.updateFace(face, frameMetadata.getCameraFacing(), result);
         });
