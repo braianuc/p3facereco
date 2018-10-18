@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.google.firebase.samples.apps.mlkit.java.facedetection;
 
+import android.app.Activity;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -24,9 +26,13 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import com.google.firebase.samples.apps.mlkit.common.FrameMetadata;
 import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
+import com.google.firebase.samples.apps.mlkit.java.LivePreviewActivity;
 import com.google.firebase.samples.apps.mlkit.java.VisionProcessorBase;
+import com.google.firebase.samples.apps.mlkit.java.facerecognition.FaceRecognitionProcessor;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 
 /** Face Detector Demo. */
@@ -35,8 +41,11 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
   private static final String TAG = "FaceDetectionProcessor";
 
   private final FirebaseVisionFaceDetector detector;
+  private FaceRecognitionProcessor processor;
 
-  public FaceDetectionProcessor() {
+  private ByteBuffer buffer = null;
+
+  public FaceDetectionProcessor(Activity livePreviewActivity) throws IOException {
     FirebaseVisionFaceDetectorOptions options =
         new FirebaseVisionFaceDetectorOptions.Builder()
             .setClassificationType(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
@@ -45,12 +54,19 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
             .build();
 
     detector = FirebaseVision.getInstance().getVisionFaceDetector(options);
+
+    //System.out.println("ACTIVITY ASSETS");
+    //System.err.println(livePreviewActivity.getAssets());
+    //System.err.println(livePreviewActivity.getAssets().open("emp.txt").toString());
+    //System.out.println(livePreviewActivity.getAssets().openFd("emp.tflite");
+    processor = new FaceRecognitionProcessor(livePreviewActivity);
   }
 
   @Override
   public void stop() {
     try {
       detector.close();
+      processor.close();
     } catch (IOException e) {
       Log.e(TAG, "Exception thrown while trying to close Face Detector: " + e);
     }
@@ -67,16 +83,28 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
       @NonNull FrameMetadata frameMetadata,
       @NonNull GraphicOverlay graphicOverlay) {
     graphicOverlay.clear();
-    for (int i = 0; i < faces.size(); ++i) {
-      FirebaseVisionFace face = faces.get(i);
-      FaceGraphic faceGraphic = new FaceGraphic(graphicOverlay);
-      graphicOverlay.add(faceGraphic);
-      faceGraphic.updateFace(face, frameMetadata.getCameraFacing());
-    }
+    faces.forEach(face -> {
+        FaceGraphic faceGraphic = new FaceGraphic(graphicOverlay);
+        graphicOverlay.add(faceGraphic);
+        faceGraphic.updateFace(face, frameMetadata.getCameraFacing());
+        if(null != buffer) {
+          //System.out.println("Classifying...........");
+          //String result = processor.classifyFrame(buffer);
+          //System.out.println(result); // tODO
+        }
+
+    });
   }
 
   @Override
   protected void onFailure(@NonNull Exception e) {
     Log.e(TAG, "Face detection failed " + e);
+  }
+
+
+  @Override
+  public void process(ByteBuffer data, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay) {
+    super.process(data, frameMetadata, graphicOverlay);
+    buffer = data;
   }
 }

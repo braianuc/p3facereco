@@ -16,6 +16,7 @@ package com.google.firebase.samples.apps.mlkit.java;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
@@ -153,13 +154,15 @@ public final class LivePreviewActivity extends AppCompatActivity
           break;
         case FACE_DETECTION:
           Log.i(TAG, "Using Face Detector Processor");
-          cameraSource.setMachineLearningFrameProcessor(new FaceDetectionProcessor());
+          cameraSource.setMachineLearningFrameProcessor(new FaceDetectionProcessor(this));
           break;
         default:
           Log.e(TAG, "Unknown model: " + model);
       }
     } catch (FirebaseMLException e) {
       Log.e(TAG, "can not create camera source: " + model);
+    } catch (IOException e) {
+      Log.e(TAG, "Cannot create the face recognition processor.");
     }
   }
 

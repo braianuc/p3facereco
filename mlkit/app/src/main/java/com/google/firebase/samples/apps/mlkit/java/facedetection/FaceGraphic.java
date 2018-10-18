@@ -82,7 +82,6 @@ public class FaceGraphic extends Graphic {
     if (null == firebaseVisionFace)
       return;
     drawRectangle(firebaseVisionFace, canvas);
-
     //<editor-fold>
     /*canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint);
 

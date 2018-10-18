@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fireTopLayout"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#872828"
+    android:background="#000000"
     android:keepScreenOn="true">
 
   <com.google.firebase.samples.apps.mlkit.common.CameraSourcePreview
       android:id="@+id/firePreview"
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="match_parent"
+      android:layout_below="@+id/space">
 
       <com.google.firebase.samples.apps.mlkit.common.GraphicOverlay
           android:id="@+id/fireFaceOverlay"
@@ -30,6 +31,13 @@
       android:textColor="#FFF"
       android:textSize="20sp"
       android:textStyle="bold" />
+
+    <FrameLayout
+        android:id="@+id/space"
+        android:layout_height="70dp"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="false"
+        android:background="#000" />
 
     <!--<FrameLayout
        android:id="@+id/control"
@@ -58,4 +66,4 @@
 
   </FrameLayout>-->
 
-</FrameLayout>
+</RelativeLayout>

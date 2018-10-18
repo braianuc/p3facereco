@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fireTopLayout"
     android:orientation="horizontal"
@@ -11,7 +11,8 @@
   <com.google.firebase.samples.apps.mlkit.common.CameraSourcePreview
       android:id="@+id/firePreview"
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="match_parent"
+      android:layout_toRightOf="@+id/space">
 
     <com.google.firebase.samples.apps.mlkit.common.GraphicOverlay
         android:id="@+id/fireFaceOverlay"
@@ -19,6 +20,13 @@
         android:layout_height="match_parent" />
 
   </com.google.firebase.samples.apps.mlkit.common.CameraSourcePreview>
+
+  <FrameLayout
+      android:id="@+id/space"
+      android:layout_width="70dp"
+      android:layout_height="match_parent"
+      android:layout_alignParentTop="false"
+      android:background="#000" />
 
   <!--<FrameLayout
       android:id="@+id/control"
@@ -54,4 +62,4 @@
 
   </FrameLayout>-->
 
-</FrameLayout>
+</RelativeLayout>
