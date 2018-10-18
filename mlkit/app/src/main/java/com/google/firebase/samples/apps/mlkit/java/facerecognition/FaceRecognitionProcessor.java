@@ -18,13 +18,18 @@ package com.google.firebase.samples.apps.mlkit.java.facerecognition;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -125,16 +130,17 @@ public class FaceRecognitionProcessor {
     /**
      * Classifies a frame from the preview stream.
      */
-    public String classifyFrame(ByteBuffer buf) {
+    public String classifyFrame(ByteBuffer buf, int width, int height) {
         if (tflite == null) {
             Log.e(TAG, "Image classifier has not been initialized; Skipped.");
             return "Uninitialized Classifier.";
         }
         buf.order(ByteOrder.nativeOrder());
-        processByteBuffer(buf);
+        Bitmap bitmap = createResizedBitmap(buf, width, height);
+        convertBitmapToByteBuffer(bitmap);
         // Here's where the magic happens!!!
         //long startTime = SystemClock.uptimeMillis();
-        tflite.run(buf, labelProbArray);
+        tflite.run(imgData, labelProbArray);
         //long endTime = SystemClock.uptimeMillis();
         //Log.d(TAG, "Timecost to run model inference: " + Long.toString(endTime - startTime)); // TODO log
         // smooth the results
@@ -208,11 +214,12 @@ public class FaceRecognitionProcessor {
     /**
      * Writes Image data into a {@code ByteBuffer}.
      */
-    private void processByteBuffer(ByteBuffer buf) {
+    private void convertBitmapToByteBuffer(Bitmap bitmap) {
         if (imgData == null) {
             return;
         }
         imgData.rewind();
+        bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
         // Convert the image to floating point.
         int pixel = 0;
         //long startTime = SystemClock.uptimeMillis();
@@ -226,6 +233,16 @@ public class FaceRecognitionProcessor {
         }
         //long endTime = SystemClock.uptimeMillis();
         //Log.d(TAG, "Timecost to put values into ByteBuffer: " + Long.toString(endTime - startTime)); // TODO log
+    }
+
+    /** Resizes image data from {@code ByteBuffer}. */
+    private Bitmap createResizedBitmap(ByteBuffer buffer, int width, int height) {
+        YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        img.compressToJpeg(new Rect(0, 0, img.getWidth(), img.getHeight()), 50, out);
+        byte[] imageBytes = out.toByteArray();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        return Bitmap.createScaledBitmap(bitmap, DIM_IMG_SIZE_X, DIM_IMG_SIZE_Y, true);
     }
 
     /**

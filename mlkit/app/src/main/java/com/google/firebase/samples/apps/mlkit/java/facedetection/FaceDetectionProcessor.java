@@ -88,9 +88,8 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
         graphicOverlay.add(faceGraphic);
         faceGraphic.updateFace(face, frameMetadata.getCameraFacing());
         if(null != buffer) {
-          //System.out.println("Classifying...........");
-          //String result = processor.classifyFrame(buffer);
-          //System.out.println(result); // tODO
+          String result = processor.classifyFrame(buffer, frameMetadata.getWidth(), frameMetadata.getHeight());
+          System.out.println(result);
         }
 
     });
