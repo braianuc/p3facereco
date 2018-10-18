@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // -- Altered version
-package com.google.firebase.samples.apps.mlkit.java.facedetection;
+package com.p3ds.facereco.java.facedetection;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -29,10 +29,10 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
-import com.google.firebase.samples.apps.mlkit.common.FrameMetadata;
-import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
-import com.google.firebase.samples.apps.mlkit.java.VisionProcessorBase;
-import com.google.firebase.samples.apps.mlkit.java.facerecognition.FaceRecognitionProcessor;
+import com.p3ds.facereco.java.VisionProcessorBase;
+import com.p3ds.facereco.java.facerecognition.FaceRecognitionProcessor;
+import com.p3ds.facereco.java.processing.FrameMetadata;
+import com.p3ds.facereco.java.processing.GraphicOverlay;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

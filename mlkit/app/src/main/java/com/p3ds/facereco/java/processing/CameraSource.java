@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.firebase.samples.apps.mlkit.common;
+package com.p3ds.facereco.java.processing;
 
 import android.Manifest;
 import android.annotation.SuppressLint;

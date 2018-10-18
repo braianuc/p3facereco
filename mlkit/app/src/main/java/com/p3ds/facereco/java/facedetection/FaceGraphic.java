@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.firebase.samples.apps.mlkit.java.facedetection;
+package com.p3ds.facereco.java.facedetection;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
-import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
-import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay.Graphic;
+import com.p3ds.facereco.java.processing.GraphicOverlay;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
  * graphic overlay view.
  */
-public class FaceGraphic extends Graphic {
+public class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float FACE_POSITION_RADIUS = 10.0f;
     private static final float ID_TEXT_SIZE = 40.0f;
     private static final float ID_Y_OFFSET = 50.0f;

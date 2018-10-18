@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.google.firebase.samples.apps.mlkit.java.facerecognition;
+package com.p3ds.facereco.java.facerecognition;
 
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;

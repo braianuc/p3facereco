@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.google.firebase.samples.apps.mlkit.java;
+package com.p3ds.facereco.java;
 
 import android.graphics.Bitmap;
 import android.media.Image;
@@ -20,9 +20,9 @@ import android.support.annotation.NonNull;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
-import com.google.firebase.samples.apps.mlkit.common.FrameMetadata;
-import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
-import com.google.firebase.samples.apps.mlkit.common.VisionImageProcessor;
+import com.p3ds.facereco.java.processing.FrameMetadata;
+import com.p3ds.facereco.java.processing.GraphicOverlay;
+import com.p3ds.facereco.java.processing.VisionImageProcessor;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;

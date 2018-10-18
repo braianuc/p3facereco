@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.google.firebase.samples.apps.mlkit.java;
+package com.p3ds.facereco.java;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -31,11 +31,11 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CompoundButton;
 
 import com.google.android.gms.common.annotation.KeepName;
-import com.google.firebase.samples.apps.mlkit.R;
-import com.google.firebase.samples.apps.mlkit.common.CameraSource;
-import com.google.firebase.samples.apps.mlkit.common.CameraSourcePreview;
-import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
-import com.google.firebase.samples.apps.mlkit.java.facedetection.FaceDetectionProcessor;
+import com.p3ds.facereco.R;
+import com.p3ds.facereco.java.facedetection.FaceDetectionProcessor;
+import com.p3ds.facereco.java.processing.CameraSource;
+import com.p3ds.facereco.java.processing.CameraSourcePreview;
+import com.p3ds.facereco.java.processing.GraphicOverlay;
 
 import java.io.IOException;
 import java.util.ArrayList;
