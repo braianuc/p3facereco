@@ -42,113 +42,110 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
-/** Face Detector Demo. */
+/**
+ * Face Detector Demo.
+ */
 public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVisionFace>> {
 
-  private static final String TAG = "FaceDetectionProcessor";
+    private static final String TAG = "FaceDetectionProcessor";
 
-  private final FirebaseVisionFaceDetector detector;
-  private FaceRecognitionProcessor processor;
+    private final FirebaseVisionFaceDetector detector;
+    private FaceRecognitionProcessor processor;
 
-  private Bitmap bitmap = null;
+    private Bitmap bitmap = null;
 
-  public FaceDetectionProcessor(Activity livePreviewActivity) throws IOException {
-    FirebaseVisionFaceDetectorOptions options =
-        new FirebaseVisionFaceDetectorOptions.Builder()
-            .setClassificationType(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
-            .setLandmarkType(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-            .setTrackingEnabled(true)
-            .build();
+    public FaceDetectionProcessor(Activity livePreviewActivity) throws IOException {
+        FirebaseVisionFaceDetectorOptions options =
+                new FirebaseVisionFaceDetectorOptions.Builder()
+                        .setClassificationType(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+                        .setLandmarkType(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                        .setTrackingEnabled(true)
+                        .build();
 
-    detector = FirebaseVision.getInstance().getVisionFaceDetector(options);
+        detector = FirebaseVision.getInstance().getVisionFaceDetector(options);
 
-    //System.out.println("ACTIVITY ASSETS");
-    //System.err.println(livePreviewActivity.getAssets());
-    //System.err.println(livePreviewActivity.getAssets().open("emp.txt").toString());
-    //System.out.println(livePreviewActivity.getAssets().openFd("emp.tflite");
-    processor = new FaceRecognitionProcessor(livePreviewActivity);
-  }
-
-  @Override
-  public void stop() {
-    try {
-      detector.close();
-      processor.close();
-    } catch (IOException e) {
-      Log.e(TAG, "Exception thrown while trying to close Face Detector: " + e);
+        //System.out.println("ACTIVITY ASSETS");
+        //System.err.println(livePreviewActivity.getAssets());
+        //System.err.println(livePreviewActivity.getAssets().open("emp.txt").toString());
+        //System.out.println(livePreviewActivity.getAssets().openFd("emp.tflite");
+        processor = new FaceRecognitionProcessor(livePreviewActivity);
     }
-  }
 
-  @Override
-  protected Task<List<FirebaseVisionFace>> detectInImage(FirebaseVisionImage image) {
-    return detector.detectInImage(image);
-  }
-
-  private int frameCount = 0;
-
-  @Override
-  protected void onSuccess(
-          FirebaseVisionImage image,
-      @NonNull List<FirebaseVisionFace> faces,
-      @NonNull FrameMetadata frameMetadata,
-      @NonNull GraphicOverlay graphicOverlay) {
-    graphicOverlay.clear();
-    faces.forEach(face -> {
-        String result = null;
-        FaceGraphic faceGraphic = new FaceGraphic(graphicOverlay);
-        graphicOverlay.add(faceGraphic);
-        if(null != bitmap) {
-          // TODO crop bitmap
-          frameCount++;
-          if(frameCount == 100) {
-            FaceGraphic.FaceBounds bounds = faceGraphic.getFaceBoundsForFace(face);
-            int x = (int) bounds.getLeft() < 0 ? 0 : (int) bounds.getLeft();
-            int y = (int) bounds.getTop() > bitmap.getHeight() ? bitmap.getHeight() : (int) bounds.getTop();
-            int width = bounds.getWidth() - 150;
-            int height = bounds.getHeight() - 100;
-            if(x + width > bitmap.getWidth()) {
-                width = bitmap.getWidth() -  x;
-            }
-              if(y + height > bitmap.getHeight()) {
-                  height = bitmap.getHeight() - y;
-              }
-            System.err.printf(String.format("\n%s %s %s %s\n", x, y, width, height));
-            Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x, y, width, height);
-            String path = Environment.getExternalStorageDirectory().toString() + "/croppedFaceBmpxx" + face.getTrackingId() + ".jpg";
-            try (FileOutputStream out = new FileOutputStream(new File(path))) {
-              croppedFaceBmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-              System.err.println("Saved Bitmap to " + path);
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          }
-          result = processor.classifyFrame(bitmap);
+    @Override
+    public void stop() {
+        try {
+            detector.close();
+            processor.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Exception thrown while trying to close Face Detector: " + e);
         }
-      faceGraphic.updateFace(face, frameMetadata.getCameraFacing(), result);
-    });
-  }
+    }
 
-  @Override
-  protected void onFailure(@NonNull Exception e) {
-    Log.e(TAG, "Face detection failed " + e);
-  }
+    @Override
+    protected Task<List<FirebaseVisionFace>> detectInImage(FirebaseVisionImage image) {
+        return detector.detectInImage(image);
+    }
+
+    @Override
+    protected void onSuccess(
+            FirebaseVisionImage image,
+            @NonNull List<FirebaseVisionFace> faces,
+            @NonNull FrameMetadata frameMetadata,
+            @NonNull GraphicOverlay graphicOverlay) {
+        graphicOverlay.clear();
+        faces.forEach(face -> {
+            String result = null;
+            FaceGraphic faceGraphic = new FaceGraphic(graphicOverlay);
+            graphicOverlay.add(faceGraphic);
+            if (null != bitmap) {
+                FaceGraphic.FaceBounds bounds = faceGraphic.getFaceBoundsForFace(face);
+                int x = (int) bounds.getLeft() < 0 ? 0 : (int) bounds.getLeft();
+                int y = (int) bounds.getTop() > bitmap.getHeight() ? bitmap.getHeight() : (int) bounds.getTop();
+                int width = bounds.getWidth() - 150;
+                int height = bounds.getHeight() - 100;
+                if (x + width > bitmap.getWidth()) {
+                    width = bitmap.getWidth() - x;
+                }
+                if (y + height > bitmap.getHeight()) {
+                    height = bitmap.getHeight() - y;
+                }
+                Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x < 0 ? 0 : x, y < 0 ? 0 : y, width, height);
+                /*String path = Environment.getExternalStorageDirectory().toString() + "/croppedFaceBmpxx" + face.getTrackingId() + ".jpg";
+                try (FileOutputStream out = new FileOutputStream(new File(path))) {
+                    croppedFaceBmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    System.err.println("Saved Bitmap to " + path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+                result = processor.classifyFrame(croppedFaceBmp);
+            }
+            faceGraphic.updateFace(face, frameMetadata.getCameraFacing(), result);
+        });
+    }
+
+    @Override
+    protected void onFailure(@NonNull Exception e) {
+        Log.e(TAG, "Face detection failed " + e);
+    }
 
 
-  @Override
-  public void process(ByteBuffer data, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay) {
-    super.process(data, frameMetadata, graphicOverlay);
-    data.order(ByteOrder.nativeOrder());
-    bitmap = createResizedBitmap(data, frameMetadata.getWidth(), frameMetadata.getHeight());
-  }
+    @Override
+    public void process(ByteBuffer data, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay) {
+        super.process(data, frameMetadata, graphicOverlay);
+        data.order(ByteOrder.nativeOrder());
+        bitmap = createResizedBitmap(data, frameMetadata.getWidth(), frameMetadata.getHeight());
+    }
 
 
-  /** Resizes image data from {@code ByteBuffer}. */
-  private Bitmap createResizedBitmap(ByteBuffer buffer, int width, int height) {
-    YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null);
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    img.compressToJpeg(new Rect(0, 0, img.getWidth(), img.getHeight()), 50, out);
-    byte[] imageBytes = out.toByteArray();
-    return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-  }
+    /**
+     * Resizes image data from {@code ByteBuffer}.
+     */
+    private Bitmap createResizedBitmap(ByteBuffer buffer, int width, int height) {
+        YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        img.compressToJpeg(new Rect(0, 0, img.getWidth(), img.getHeight()), 50, out);
+        byte[] imageBytes = out.toByteArray();
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    }
 
 }
