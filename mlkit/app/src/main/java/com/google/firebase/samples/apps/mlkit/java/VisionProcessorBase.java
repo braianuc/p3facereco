@@ -15,6 +15,7 @@ package com.google.firebase.samples.apps.mlkit.java;
 
 import android.graphics.Bitmap;
 import android.media.Image;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -22,16 +23,20 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
+import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.samples.apps.mlkit.common.FrameMetadata;
 import com.google.firebase.samples.apps.mlkit.common.GraphicOverlay;
 import com.google.firebase.samples.apps.mlkit.common.VisionImageProcessor;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Abstract base class for ML Kit frame processors. Subclasses need to implement {@link
- * #onSuccess(T, FrameMetadata, GraphicOverlay)} to define what they want to with the detection
+ * #onSuccess(FirebaseVisionImage, T, FrameMetadata, GraphicOverlay)} to define what they want to with the detection
  * results and {@link #detectInImage(FirebaseVisionImage)} to specify the detector object.
  *
  * @param <T> The type of the detected feature.
@@ -101,7 +106,7 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
                 .addOnSuccessListener(
                         results -> {
                             shouldThrottle.set(false);
-                            VisionProcessorBase.this.onSuccess(results, metadata,
+                            VisionProcessorBase.this.onSuccess(image, results, metadata,
                                     graphicOverlay);
                         })
                 .addOnFailureListener(
@@ -121,6 +126,7 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
     protected abstract Task<T> detectInImage(FirebaseVisionImage image);
 
     protected abstract void onSuccess(
+            FirebaseVisionImage image,
             @NonNull T results,
             @NonNull FrameMetadata frameMetadata,
             @NonNull GraphicOverlay graphicOverlay);

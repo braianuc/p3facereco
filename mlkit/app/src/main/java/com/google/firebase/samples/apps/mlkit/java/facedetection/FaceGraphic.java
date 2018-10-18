@@ -30,8 +30,8 @@ public class FaceGraphic extends Graphic {
   private static final float FACE_POSITION_RADIUS = 10.0f;
   private static final float ID_TEXT_SIZE = 40.0f;
   private static final float ID_Y_OFFSET = 50.0f;
-  private static final float ID_X_OFFSET = -50.0f;
-  private static final float BOX_STROKE_WIDTH = 5.0f;
+  private static final float ID_X_OFFSET = -100.0f;
+  private static final float BOX_STROKE_WIDTH = 8.0f;
 
   private static final int[] COLOR_CHOICES = {
     Color.MAGENTA
@@ -46,6 +46,8 @@ public class FaceGraphic extends Graphic {
   private final Paint boxPaint;
 
   private volatile FirebaseVisionFace firebaseVisionFace;
+
+  private String faceName = null;
 
   public FaceGraphic(GraphicOverlay overlay) {
     super(overlay);
@@ -70,9 +72,10 @@ public class FaceGraphic extends Graphic {
    * Updates the face instance from the detection of the most recent frame. Invalidates the relevant
    * portions of the overlay to trigger a redraw.
    */
-  public void updateFace(FirebaseVisionFace face, int facing) {
+  public void updateFace(FirebaseVisionFace face, int facing, String faceName) {
     firebaseVisionFace = face;
     this.cameraFacing = facing;
+    this.faceName = faceName;
     postInvalidate();
   }
 
@@ -135,6 +138,15 @@ public class FaceGraphic extends Graphic {
    * Draw a rectangle around the face.
    */
   private void drawRectangle(FirebaseVisionFace face, Canvas canvas) {
+    FaceBounds faceBounds = getFaceBoundsForFace(face);
+    canvas.drawRect(faceBounds.getLeft(), faceBounds.getTop(), faceBounds.getRight(), faceBounds.getBottom(), boxPaint);
+    if (null != faceName) {
+      //canvas.drawText("Face ID: " + face.getTrackingId(), x + ID_X_OFFSET, bottom + ID_Y_OFFSET, idPaint);
+      canvas.drawText(faceName, faceBounds.getX() + ID_X_OFFSET, faceBounds.getBottom() + ID_Y_OFFSET, idPaint);
+    }
+  }
+
+  public FaceBounds getFaceBoundsForFace(FirebaseVisionFace face) {
     float x = translateX(face.getBoundingBox().centerX());
     float y = translateY(face.getBoundingBox().centerY());
     float xOffset = scaleX(face.getBoundingBox().width() / 2.0f);
@@ -143,9 +155,83 @@ public class FaceGraphic extends Graphic {
     float top = y - yOffset;
     float right = x + xOffset;
     float bottom = y + yOffset;
-    canvas.drawRect(left, top, right, bottom, boxPaint);
-    canvas.drawText("Face ID: " + face.getTrackingId(), x + ID_X_OFFSET, bottom + ID_Y_OFFSET, idPaint);
+    return new FaceBounds(x, y, xOffset, yOffset, left, top, right, bottom);
   }
+
+  public static class FaceBounds {
+
+    private float x;
+    private float y;
+    private float xOffset;
+    private float yOffset;
+
+    private float left;
+    private float top;
+    private float bottom;
+    private float right;
+
+    public FaceBounds(float x, float y, float xOffset, float yOffset, float left, float top, float right, float bottom) {
+      this.x = x;
+      this.y = y;
+      this.xOffset = xOffset;
+      this.yOffset = yOffset;
+      this.left = left;
+      this.top = top;
+      this.bottom = bottom;
+      this.right = right;
+    }
+
+    public float getLeft() {
+      return left;
+    }
+
+    public float getTop() {
+      return top;
+    }
+
+    public float getBottom() {
+      return bottom;
+    }
+
+    public float getRight() {
+      return right;
+    }
+
+    public float getX() {
+      return x;
+    }
+
+    public float getY() {
+      return y;
+    }
+
+    public float getxOffset() {
+      return xOffset;
+    }
+
+    public float getyOffset() {
+      return yOffset;
+    }
+
+
+    public int getWidth() {
+      return (int) (right  - left);
+    }
+
+    public int getHeight() {
+      return (int) (bottom - top);
+    }
+
+    public int getWidthOffset(int x) {
+      return (int) (x - left);
+    }
+
+    public int getHeightOffset(int y) {
+      return (int) (y - top);
+    }
+
+  }
+
 
   //<editor-fold>
   /*
