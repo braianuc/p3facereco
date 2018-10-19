@@ -99,27 +99,21 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
                 FaceGraphic.FaceBounds bounds = faceGraphic.getFaceBoundsForFace(face);
                 int x = (int) bounds.getLeft() < 0 ? 0 : (int) bounds.getLeft();
                 int y = (int) bounds.getTop() > bitmap.getHeight() ? bitmap.getHeight() : (int) bounds.getTop();
+                if(y < 0) {
+                    y = 0;
+                }
                 int width = bounds.getWidth() - 150;
                 int height = bounds.getHeight() - 100;
+                //System.out.printf(String.format("\n1.%s %s %s %s\n", x, y, width, height));
                 if (x + width > bitmap.getWidth()) {
                     width = bitmap.getWidth() - x;
                 }
                 if (y + height > bitmap.getHeight()) {
                     height = bitmap.getHeight() - y;
                 }
-                if(y + height <= bitmap.getHeight() && x + width <= bitmap.getWidth()) {
-                    Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x < 0 ? 0 : x, y < 0 ? 0 : y, width, height);
-                    result = processor.classifyFrame(croppedFaceBmp);
-                } else {
-                    Log.e(TAG, "Unable to crop bitmap, skipping frame...");
-                }
-                /*String path = Environment.getExternalStorageDirectory().toString() + "/croppedFaceBmpxx" + face.getTrackingId() + ".jpg";
-                try (FileOutputStream out = new FileOutputStream(new File(path))) {
-                    croppedFaceBmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    System.err.println("Saved Bitmap to " + path);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
+                //System.out.printf(String.format("\n2. %s %s %s %s\n", x, y, width, height));
+                Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x, y, width, height);
+                result = processor.classifyFrame(croppedFaceBmp);
             }
             faceGraphic.updateFace(face, frameMetadata.getCameraFacing(), result);
         });
@@ -145,15 +139,15 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
     public void process(ByteBuffer data, FrameMetadata frameMetadata, GraphicOverlay graphicOverlay) {
         super.process(data, frameMetadata, graphicOverlay);
         data.order(ByteOrder.nativeOrder());
-        bitmap = createResizedBitmap(data, frameMetadata.getWidth(), frameMetadata.getHeight());
+        bitmap = createBitmapFromByteBuffer(data, frameMetadata.getWidth(), frameMetadata.getHeight());
     }
 
 
     /**
-     * Resizes image data from {@code ByteBuffer}.
+     * Creates a bitmap from {@code ByteBuffer}
      */
-    private Bitmap createResizedBitmap(ByteBuffer buffer, int width, int height) {
-        YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null); // Producing onFlyCompress
+    private Bitmap createBitmapFromByteBuffer(ByteBuffer buffer, int width, int height) {
+        YuvImage img = new YuvImage(buffer.array(), ImageFormat.NV21, width, height, null); // Prod onFlyCompress
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         img.compressToJpeg(new Rect(0, 0, img.getWidth(), img.getHeight()), 50, out);
         byte[] imageBytes = out.toByteArray();

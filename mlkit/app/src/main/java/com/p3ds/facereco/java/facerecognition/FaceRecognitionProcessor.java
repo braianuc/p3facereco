@@ -18,12 +18,15 @@ package com.p3ds.facereco.java.facerecognition;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.os.Environment;
 import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
@@ -50,7 +53,7 @@ public class FaceRecognitionProcessor {
     /**
      * Name of the model file stored in Assets.
      */
-    private static final String MODEL_PATH = "emp.tflite";
+    private static final String MODEL_PATH = "emp2.tflite";
 
     /**
      * Name of the label file stored in Assets.
@@ -127,24 +130,17 @@ public class FaceRecognitionProcessor {
     public String classifyFrame(Bitmap bitmap) {
         if (tflite == null) {
             Log.e(TAG, "Image classifier has not been initialized; Skipped.");
-            return "Uninitialized Classifier.";
+            return "Unknown";
         }
         if (bitmap.isRecycled()) {
             System.out.println("Bitmap recycled prematurely, skipping frame...");
             return "";
         }
         convertBitmapToByteBuffer(bitmap);
-        // Here's where the magic happens!!!
-        //long startTime = SystemClock.uptimeMillis();
         tflite.run(imgData, labelProbArray);
-        //long endTime = SystemClock.uptimeMillis();
-        //Log.d(TAG, "Timecost to run model inference: " + Long.toString(endTime - startTime)); // TODO log
-        // smooth the results
         applyFilter();
         bitmap.recycle();
-        String textToShow = printLabelConfidence();
-        //textToShow = Long.toString(endTime - startTime) + "ms" + textToShow;
-        return textToShow;
+        return printLabelConfidence();
     }
 
     void applyFilter() {
@@ -183,7 +179,7 @@ public class FaceRecognitionProcessor {
      * Reads label list from Assets.
      */
     private List<String> loadLabelList(Activity activity) throws IOException {
-        List<String> labelList = new ArrayList<String>();
+        List<String> labelList = new ArrayList<>();
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(activity.getAssets().open(LABEL_PATH)));
         String line;
@@ -206,6 +202,7 @@ public class FaceRecognitionProcessor {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
+    int frameCount = 0;
 
     /**
      * Writes Image data into a {@code ByteBuffer}.
@@ -216,6 +213,19 @@ public class FaceRecognitionProcessor {
         }
         imgData.rewind();
         bitmap = Bitmap.createScaledBitmap(bitmap, FaceRecognitionProcessor.DIM_IMG_SIZE_X, FaceRecognitionProcessor.DIM_IMG_SIZE_Y, true);
+
+        // Save every 10th frame for debugging purposes
+
+        System.out.println(frameCount);
+        frameCount++;
+        if(frameCount % 10 == 0) {
+            try {
+                saveBitmapToFile(bitmap, "croppedFaceBmp" + "-" + ( frameCount / 10 ));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
         // Convert the image to floating point.
         int pixel = 0;
@@ -251,5 +261,23 @@ public class FaceRecognitionProcessor {
         String textToShow = String.format("\n%s (%.0f%%)", label.getKey().substring(0, 1).toUpperCase() + label.getKey().substring(1), label.getValue() * 100); // + textToShow
         //}
         return textToShow;
+    }
+
+
+    /**
+     * Save a bitmap to file
+     * @param bitmap input file
+     * @param fileName output file name
+     */
+    @SuppressWarnings("unused")
+    private void saveBitmapToFile(Bitmap bitmap, String fileName) throws IOException {
+        String path = Environment.getExternalStorageDirectory().toString() + "/" + fileName + ".jpg";
+        try (FileOutputStream out = new FileOutputStream(new File(path))) {
+            if(bitmap.isRecycled()) {
+                throw new IOException("Bitmap is recycled, cannot save.");
+            }
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            System.out.println("Saved Bitmap to " + path);
+        }
     }
 }
