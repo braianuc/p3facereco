@@ -85,7 +85,7 @@ public class FaceRecognitionProcessor {
     /**
      * An instance of the driver class to run model inference with Tensorflow Lite.
      */
-    private Interpreter tflite;
+    private Interpreter tfLite;
 
 
     private ByteBuffer imgData;
@@ -115,7 +115,7 @@ public class FaceRecognitionProcessor {
      * Initializes an {@code ImageClassifier}.
      */
     public FaceRecognitionProcessor(Activity activity) throws IOException {
-        tflite = new Interpreter(loadModelFile(activity));
+        tfLite = new Interpreter(loadModelFile(activity));
         imgData = ByteBuffer.allocateDirect(4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
         imgData.order(ByteOrder.nativeOrder());
         labelList = loadLabelList(activity);
@@ -128,7 +128,7 @@ public class FaceRecognitionProcessor {
      * Classifies a frame from the preview stream.
      */
     public String classifyFrame(Bitmap bitmap) {
-        if (tflite == null) {
+        if (tfLite == null) {
             Log.e(TAG, "Image classifier has not been initialized; Skipped.");
             return "Unknown";
         }
@@ -137,7 +137,7 @@ public class FaceRecognitionProcessor {
             return "";
         }
         convertBitmapToByteBuffer(bitmap);
-        tflite.run(imgData, labelProbArray);
+        tfLite.run(imgData, labelProbArray);
         applyFilter();
         bitmap.recycle();
         return printLabelConfidence();
@@ -145,13 +145,10 @@ public class FaceRecognitionProcessor {
 
     void applyFilter() {
         int num_labels = labelList.size();
-
-        // Low pass filter `labelProbArray` into the first stage of the filter.
         for (int j = 0; j < num_labels; ++j) {
             filterLabelProbArray[0][j] += FILTER_FACTOR * (labelProbArray[0][j] -
                     filterLabelProbArray[0][j]);
         }
-        // Low pass filter each stage into the next.
         for (int i = 1; i < FILTER_STAGES; ++i) {
             for (int j = 0; j < num_labels; ++j) {
                 filterLabelProbArray[i][j] += FILTER_FACTOR * (
@@ -161,7 +158,6 @@ public class FaceRecognitionProcessor {
             }
         }
 
-        // Copy the last stage filter output back to `labelProbArray`.
         for (int j = 0; j < num_labels; ++j) {
             labelProbArray[0][j] = filterLabelProbArray[FILTER_STAGES - 1][j];
         }
@@ -171,8 +167,8 @@ public class FaceRecognitionProcessor {
      * Close TF Lite and release resources.
      */
     public void close() {
-        tflite.close();
-        tflite = null;
+        tfLite.close();
+        tfLite = null;
     }
 
     /**
@@ -227,9 +223,7 @@ public class FaceRecognitionProcessor {
         }
 
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-        // Convert the image to floating point.
         int pixel = 0;
-        //long startTime = SystemClock.uptimeMillis();
         for (int i = 0; i < DIM_IMG_SIZE_X; ++i) {
             for (int j = 0; j < DIM_IMG_SIZE_Y; ++j) {
                 final int val = intValues[pixel++];
@@ -238,8 +232,6 @@ public class FaceRecognitionProcessor {
                 imgData.putFloat((((val) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
             }
         }
-        //long endTime = SystemClock.uptimeMillis();
-        //Log.d(TAG, "Timecost to put values into ByteBuffer: " + Long.toString(endTime - startTime)); // TODO log
     }
 
 
