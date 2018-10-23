@@ -61,7 +61,6 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
                         .build();
 
         detector = FirebaseVision.getInstance().getVisionFaceDetector(options);
-
         //System.out.println("ACTIVITY ASSETS");
         //System.err.println(livePreviewActivity.getAssets());
         //System.err.println(livePreviewActivity.getAssets().open("emp.txt").toString());
@@ -112,8 +111,9 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
                     height = bitmap.getHeight() - y;
                 }
                 //System.out.printf(String.format("\n2. %s %s %s %s\n", x, y, width, height));
-                Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x, y, width, height);
-                result = processor.classifyFrame(croppedFaceBmp);
+                //Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x, y, width, height);
+                //result = processor.classifyFrame(croppedFaceBmp);
+                result = "";
             }
             faceGraphic.updateFace(face, frameMetadata.getCameraFacing(), result);
         });

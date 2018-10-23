@@ -53,12 +53,12 @@ public class FaceRecognitionProcessor {
     /**
      * Name of the model file stored in Assets.
      */
-    private static final String MODEL_PATH = "emp2.tflite";
+    private static final String MODEL_PATH = "emp.tflite";
 
     /**
      * Name of the label file stored in Assets.
      */
-    private static final String LABEL_PATH = "emp.txt";
+    private static final String LABEL_PATH = "retrained_labels.txt";
 
     /**
      * Number of results to show in the UI.
@@ -79,30 +79,17 @@ public class FaceRecognitionProcessor {
     private static final float IMAGE_STD = 128.0f;
 
 
-    /* Preallocated buffers for storing image data in. */
-    private int[] intValues = new int[DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y];
-
     /**
      * An instance of the driver class to run model inference with Tensorflow Lite.
      */
     private Interpreter tfLite;
-
-
-    private ByteBuffer imgData;
 
     /**
      * Labels corresponding to the output of the vision model.
      */
     private List<String> labelList;
 
-    /**
-     * An array to hold inference results, to be feed into Tensorflow Lite as outputs.
-     */
-    private float[][] labelProbArray = null;
-    /**
-     * multi-stage low pass filter
-     **/
-    private float[][] filterLabelProbArray = null;
+
     private static final int FILTER_STAGES = 3;
     private static final float FILTER_FACTOR = 0.4f;
 
@@ -116,11 +103,7 @@ public class FaceRecognitionProcessor {
      */
     public FaceRecognitionProcessor(Activity activity) throws IOException {
         tfLite = new Interpreter(loadModelFile(activity));
-        imgData = ByteBuffer.allocateDirect(4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
-        imgData.order(ByteOrder.nativeOrder());
         labelList = loadLabelList(activity);
-        labelProbArray = new float[1][labelList.size()];
-        filterLabelProbArray = new float[FILTER_STAGES][labelList.size()];
         Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
     }
 
@@ -136,15 +119,17 @@ public class FaceRecognitionProcessor {
             System.out.println("Bitmap recycled prematurely, skipping frame...");
             return "";
         }
-        convertBitmapToByteBuffer(bitmap);
-        tfLite.run(imgData, labelProbArray);
-        applyFilter();
+        ByteBuffer imgData = convertBitmapToByteBuffer(bitmap);
+        float[][] labelProb = applyFilter();
+        tfLite.run(imgData, labelProb);
         bitmap.recycle();
-        return printLabelConfidence();
+        return printLabelConfidence(labelProb);
     }
 
-    void applyFilter() {
+    private float[][] applyFilter() {
         int num_labels = labelList.size();
+        float[][] labelProbArray = new float[1][labelList.size()];
+        float[][] filterLabelProbArray = new float[FILTER_STAGES][labelList.size()];
         for (int j = 0; j < num_labels; ++j) {
             filterLabelProbArray[0][j] += FILTER_FACTOR * (labelProbArray[0][j] -
                     filterLabelProbArray[0][j]);
@@ -161,6 +146,7 @@ public class FaceRecognitionProcessor {
         for (int j = 0; j < num_labels; ++j) {
             labelProbArray[0][j] = filterLabelProbArray[FILTER_STAGES - 1][j];
         }
+        return labelProbArray;
     }
 
     /**
@@ -198,30 +184,28 @@ public class FaceRecognitionProcessor {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
-    int frameCount = 0;
+    //int frameCount = 0;
 
     /**
      * Writes Image data into a {@code ByteBuffer}.
      */
-    private void convertBitmapToByteBuffer(Bitmap bitmap) {
-        if (imgData == null) {
-            return;
-        }
+    private ByteBuffer convertBitmapToByteBuffer(Bitmap bitmap) {
+        ByteBuffer imgData = ByteBuffer.allocateDirect(4 * DIM_BATCH_SIZE * DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y * DIM_PIXEL_SIZE);
+        imgData.order(ByteOrder.nativeOrder());
         imgData.rewind();
         bitmap = Bitmap.createScaledBitmap(bitmap, FaceRecognitionProcessor.DIM_IMG_SIZE_X, FaceRecognitionProcessor.DIM_IMG_SIZE_Y, true);
-
         // Save every 10th frame for debugging purposes
 
-        System.out.println(frameCount);
-        frameCount++;
-        if(frameCount % 10 == 0) {
-            try {
-                saveBitmapToFile(bitmap, "croppedFaceBmp" + "-" + ( frameCount / 10 ));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
+        //System.out.println("Frame " + frameCount);
+        //frameCount++;
+        //if(frameCount % 10 == 0) {
+        //    try {
+        //        saveBitmapToFile(bitmap, "faces/face" + ( frameCount ));
+        //    } catch (IOException e) {
+        //        e.printStackTrace();
+        //    }
+        //}
+        int[] intValues = new int[DIM_IMG_SIZE_X * DIM_IMG_SIZE_Y];
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
         int pixel = 0;
         for (int i = 0; i < DIM_IMG_SIZE_X; ++i) {
@@ -232,16 +216,17 @@ public class FaceRecognitionProcessor {
                 imgData.putFloat((((val) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
             }
         }
+        return imgData;
     }
 
 
     /**
      * Prints the label and its confidence level
      */
-    private String printLabelConfidence() {
+    private String printLabelConfidence(float[][] labelProb) {
         for (int i = 0; i < labelList.size(); ++i) {
             sortedLabels.add(
-                    new AbstractMap.SimpleEntry<>(labelList.get(i), labelProbArray[0][i]));
+                    new AbstractMap.SimpleEntry<>(labelList.get(i), labelProb[0][i]));
             if (sortedLabels.size() > RESULTS_TO_SHOW) {
                 sortedLabels.poll();
             }
@@ -269,7 +254,7 @@ public class FaceRecognitionProcessor {
                 throw new IOException("Bitmap is recycled, cannot save.");
             }
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            System.out.println("Saved Bitmap to " + path);
+            //System.out.println("Saved Bitmap to " + path);
         }
     }
 }

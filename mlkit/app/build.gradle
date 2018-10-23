@@ -46,5 +46,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision:17.0.0'
     implementation 'com.google.firebase:firebase-ml-vision-image-label-model:15.0.0'
     implementation 'com.google.firebase:firebase-ml-model-interpreter:16.2.0'
+
+    // https://mvnrepository.com/artifact/org.tensorflow/tensorflow-lite
+    compile group: 'org.tensorflow', name: 'tensorflow-lite', version: '1.10.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

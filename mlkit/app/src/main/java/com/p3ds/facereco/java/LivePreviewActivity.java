@@ -50,14 +50,12 @@ public final class LivePreviewActivity extends AppCompatActivity
         implements OnRequestPermissionsResultCallback,
         OnItemSelectedListener,
         CompoundButton.OnCheckedChangeListener {
-    private static final String FACE_DETECTION = "Face Detection";
     private static final String TAG = "LivePreviewActivity";
     private static final int PERMISSION_REQUESTS = 1;
 
     private CameraSource cameraSource = null;
     private CameraSourcePreview preview;
     private GraphicOverlay graphicOverlay;
-    private String selectedModel = FACE_DETECTION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +80,7 @@ public final class LivePreviewActivity extends AppCompatActivity
         //facingSwitch.setOnCheckedChangeListener(this);
 
         if (allPermissionsGranted()) {
-            createCameraSource(selectedModel);
+            createCameraSource();
         } else {
             getRuntimePermissions();
         }
@@ -92,11 +90,9 @@ public final class LivePreviewActivity extends AppCompatActivity
     public synchronized void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
-        selectedModel = parent.getItemAtPosition(pos).toString();
-        Log.d(TAG, "Selected model: " + selectedModel);
         preview.stop();
         if (allPermissionsGranted()) {
-            createCameraSource(selectedModel);
+            createCameraSource();
             startCameraSource();
         } else {
             getRuntimePermissions();
@@ -110,7 +106,7 @@ public final class LivePreviewActivity extends AppCompatActivity
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        Log.d(TAG, "Set facing");
+        Log.d(TAG, "Camera facing changed");
         if (cameraSource != null) {
             if (isChecked) {
                 cameraSource.setFacing(CameraSource.CAMERA_FACING_FRONT);
@@ -122,21 +118,13 @@ public final class LivePreviewActivity extends AppCompatActivity
         startCameraSource();
     }
 
-    private void createCameraSource(String model) {
+    private void createCameraSource() {
         // If there's no existing cameraSource, create one.
         if (cameraSource == null) {
             cameraSource = new CameraSource(this, graphicOverlay);
         }
-
         try {
-            switch (model) {
-                case FACE_DETECTION:
-                    Log.i(TAG, "Using Face Detector Processor");
-                    cameraSource.setMachineLearningFrameProcessor(new FaceDetectionProcessor(this));
-                    break;
-                default:
-                    Log.e(TAG, "Unknown model: " + model);
-            }
+            cameraSource.setMachineLearningFrameProcessor(new FaceDetectionProcessor(this));
         } catch (IOException e) {
             Log.e(TAG, "Cannot create the face recognition processor.");
         }
@@ -233,18 +221,14 @@ public final class LivePreviewActivity extends AppCompatActivity
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.i(TAG, "Permission granted!");
         if (allPermissionsGranted()) {
-            createCameraSource(selectedModel);
+            createCameraSource();
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean isPermissionGranted(Context context, String permission) {
-        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "Permission granted: " + permission);
-            return true;
-        }
-        Log.i(TAG, "Permission NOT granted: " + permission);
-        return false;
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
 

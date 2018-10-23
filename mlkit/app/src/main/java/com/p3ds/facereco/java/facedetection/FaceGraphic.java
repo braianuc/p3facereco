@@ -18,7 +18,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.google.firebase.ml.vision.common.FirebaseVisionPoint;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark;
+import com.p3ds.facereco.java.processing.CameraSource;
 import com.p3ds.facereco.java.processing.GraphicOverlay;
 
 /**
@@ -33,7 +36,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float BOX_STROKE_WIDTH = 8.0f;
 
     private static final int[] COLOR_CHOICES = {
-            Color.MAGENTA
+            Color.YELLOW
             //Color.BLUE, Color.CYAN, Color.GREEN, Color.MAGENTA, Color.RED, Color.WHITE, Color.YELLOW
     };
     private static int currentColorIndex = 0;
@@ -86,12 +89,29 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         if (null == firebaseVisionFace)
             return;
         drawRectangle(firebaseVisionFace, canvas);
-        //<editor-fold>
-    /*canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint);
+    }
 
+    /**
+     * Draw a rectangle around the face.
+     */
+    private void drawRectangle(FirebaseVisionFace face, Canvas canvas) {
+        FaceBounds faceBounds = getFaceBoundsForFace(face);
+        canvas.drawRect(faceBounds.getLeft(), faceBounds.getTop(), faceBounds.getRight(), faceBounds.getBottom(), boxPaint);
+        if (null != faceName) {
+            //canvas.drawText("Face ID: " + face.getTrackingId(), x + ID_X_OFFSET, bottom + ID_Y_OFFSET, idPaint);
+            canvas.drawText(faceName, faceBounds.getX() + ID_X_OFFSET, faceBounds.getBottom() + ID_Y_OFFSET, idPaint);
+        }
+        float x = faceBounds.getX();
+        float y = faceBounds.getY();
+
+
+        //<editor-fold>
+    canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint);
+
+    /*
     canvas.drawText(
         "happiness: " + String.format("%.2f", face.getSmilingProbability()),
-        x + ID_X_OFFSET * 3,
+        x + ID_X_OFFSET * 6,
         y - ID_Y_OFFSET,
         idPaint);
     if (cameraFacing == CameraSource.CAMERA_FACING_FRONT) {
@@ -120,7 +140,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         // draw landmarks
-    /*drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.BOTTOM_MOUTH);
+    drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.BOTTOM_MOUTH);
     drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.LEFT_CHEEK);
     drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.LEFT_EAR);
     drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.LEFT_MOUTH);
@@ -129,21 +149,12 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.RIGHT_CHEEK);
     drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.RIGHT_EAR);
     drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.RIGHT_EYE);
-    drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.RIGHT_MOUTH);*/
+    drawLandmarkPosition(canvas, face, FirebaseVisionFaceLandmark.RIGHT_MOUTH);
 
         //</editor-fold>
-    }
 
-    /**
-     * Draw a rectangle around the face.
-     */
-    private void drawRectangle(FirebaseVisionFace face, Canvas canvas) {
-        FaceBounds faceBounds = getFaceBoundsForFace(face);
-        canvas.drawRect(faceBounds.getLeft(), faceBounds.getTop(), faceBounds.getRight(), faceBounds.getBottom(), boxPaint);
-        if (null != faceName) {
-            //canvas.drawText("Face ID: " + face.getTrackingId(), x + ID_X_OFFSET, bottom + ID_Y_OFFSET, idPaint);
-            canvas.drawText(faceName, faceBounds.getX() + ID_X_OFFSET, faceBounds.getBottom() + ID_Y_OFFSET, idPaint);
-        }
+
+
     }
 
     public FaceBounds getFaceBoundsForFace(FirebaseVisionFace face) {
@@ -234,7 +245,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
     //<editor-fold>
-  /*
+
   private void drawLandmarkPosition(Canvas canvas, FirebaseVisionFace face, int landmarkID) {
     FirebaseVisionFaceLandmark landmark = face.getLandmark(landmarkID);
     if (landmark != null) {
@@ -244,6 +255,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
               translateY(point.getY()),
               10f, idPaint);
     }
-  }*/
+  }
     //</editor-fold>
 }
