@@ -15,6 +15,7 @@ limitations under the License.
 
 package com.p3ds.facereco.java.facerecognition;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
@@ -72,8 +73,8 @@ public class FaceRecognitionProcessor {
 
     private static final int DIM_PIXEL_SIZE = 3;
 
-    public static final int DIM_IMG_SIZE_X = 224;
-    public static final int DIM_IMG_SIZE_Y = 224;
+    private static final int DIM_IMG_SIZE_X = 224;
+    private static final int DIM_IMG_SIZE_Y = 224;
 
     private static final int IMAGE_MEAN = 128;
     private static final float IMAGE_STD = 128.0f;
@@ -110,20 +111,18 @@ public class FaceRecognitionProcessor {
     /**
      * Classifies a frame from the preview stream.
      */
-    public String classifyFrame(Bitmap bitmap) {
+    public Map.Entry<String, Float> classifyFrame(Bitmap bitmap) throws IOException {
         if (tfLite == null) {
-            Log.e(TAG, "Image classifier has not been initialized; Skipped.");
-            return "Unknown";
+            throw new IOException("Image classifier has not been initialized; Skipped.");
         }
         if (bitmap.isRecycled()) {
-            System.out.println("Bitmap recycled prematurely, skipping frame...");
-            return "";
+            throw new IOException("Bitmap recycled prematurely. Skip this frame.");
         }
         ByteBuffer imgData = convertBitmapToByteBuffer(bitmap);
         float[][] labelProb = applyFilter();
         tfLite.run(imgData, labelProb);
         bitmap.recycle();
-        return printLabelConfidence(labelProb);
+        return getLabelAndConfidence(labelProb);
     }
 
     private float[][] applyFilter() {
@@ -143,9 +142,7 @@ public class FaceRecognitionProcessor {
             }
         }
 
-        for (int j = 0; j < num_labels; ++j) {
-            labelProbArray[0][j] = filterLabelProbArray[FILTER_STAGES - 1][j];
-        }
+        System.arraycopy(filterLabelProbArray[FILTER_STAGES - 1], 0, labelProbArray[0], 0, num_labels);
         return labelProbArray;
     }
 
@@ -223,10 +220,10 @@ public class FaceRecognitionProcessor {
     /**
      * Prints the label and its confidence level
      */
-    private String printLabelConfidence(float[][] labelProb) {
+    @SuppressLint("DefaultLocale")
+    private Map.Entry<String, Float> getLabelAndConfidence(float[][] labelProb) {
         for (int i = 0; i < labelList.size(); ++i) {
-            sortedLabels.add(
-                    new AbstractMap.SimpleEntry<>(labelList.get(i), labelProb[0][i]));
+            sortedLabels.add(new AbstractMap.SimpleEntry<>(labelList.get(i), labelProb[0][i]));
             if (sortedLabels.size() > RESULTS_TO_SHOW) {
                 sortedLabels.poll();
             }
@@ -234,10 +231,9 @@ public class FaceRecognitionProcessor {
         //String textToShow = "";
         //final int size = sortedLabels.size();
         //for (int i = 0; i < size; ++i) {
-        Map.Entry<String, Float> label = sortedLabels.poll();
-        String textToShow = String.format("\n%s (%.0f%%)", label.getKey().substring(0, 1).toUpperCase() + label.getKey().substring(1), label.getValue() * 100); // + textToShow
+        return sortedLabels.poll();
+        //return String.format("\n%s (%.0f%%)", label.getKey().substring(0, 1).toUpperCase() + label.getKey().substring(1), label.getValue() * 100); // + textToShow
         //}
-        return textToShow;
     }
 
 

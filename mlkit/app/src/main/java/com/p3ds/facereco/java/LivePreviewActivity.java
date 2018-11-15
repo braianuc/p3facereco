@@ -76,8 +76,6 @@ public final class LivePreviewActivity extends AppCompatActivity
         }
 
         // TODO Toggle Button
-        //ToggleButton facingSwitch = (ToggleButton) findViewById(R.id.facingSwitch);
-        //facingSwitch.setOnCheckedChangeListener(this);
 
         if (allPermissionsGranted()) {
             createCameraSource();

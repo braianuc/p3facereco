@@ -39,9 +39,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Face Detector Demo.
+ * Face Detector.
  */
 public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVisionFace>> {
 
@@ -91,31 +92,23 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
             @NonNull GraphicOverlay graphicOverlay) {
         graphicOverlay.clear();
         faces.forEach(face -> {
-            String result = null;
+            Map.Entry<String, Float> result = null;
             FaceGraphic faceGraphic = new FaceGraphic(graphicOverlay);
             graphicOverlay.add(faceGraphic);
-            if (null != bitmap) {
-                FaceGraphic.FaceBounds bounds = faceGraphic.getFaceBoundsForFace(face);
-                int x = (int) bounds.getLeft() < 0 ? 0 : (int) bounds.getLeft();
-                int y = (int) bounds.getTop() > bitmap.getHeight() ? bitmap.getHeight() : (int) bounds.getTop();
-                if(y < 0) {
-                    y = 0;
+                FaceGraphic.FaceBounds faceBounds = faceGraphic.getFaceBoundsForFace(face);
+                Bitmap croppedFaceBmp = cropFace(faceBounds);
+                if(null != croppedFaceBmp) {
+                    try {
+                        result = processor.classifyFrame(croppedFaceBmp);
+                    } catch (IOException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
                 }
-                int width = bounds.getWidth() - 150;
-                int height = bounds.getHeight() - 100;
-                //System.out.printf(String.format("\n1.%s %s %s %s\n", x, y, width, height));
-                if (x + width > bitmap.getWidth()) {
-                    width = bitmap.getWidth() - x;
-                }
-                if (y + height > bitmap.getHeight()) {
-                    height = bitmap.getHeight() - y;
-                }
-                //System.out.printf(String.format("\n2. %s %s %s %s\n", x, y, width, height));
-                //Bitmap croppedFaceBmp = Bitmap.createBitmap(bitmap, x, y, width, height);
-                //result = processor.classifyFrame(croppedFaceBmp);
-                result = "";
-            }
-            faceGraphic.updateFace(face, frameMetadata.getCameraFacing(), result);
+            faceGraphic.updateFace(face,
+                    frameMetadata.getCameraFacing(),
+                    result != null ?
+                    String.format("\n%s (%.0f%%)", result.getKey().substring(0, 1).toUpperCase() + result.getKey().substring(1), result.getValue() * 100) :
+                    null);
         });
     }
 
@@ -152,6 +145,28 @@ public class FaceDetectionProcessor extends VisionProcessorBase<List<FirebaseVis
         img.compressToJpeg(new Rect(0, 0, img.getWidth(), img.getHeight()), 50, out);
         byte[] imageBytes = out.toByteArray();
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+    }
+
+    private Bitmap cropFace(FaceGraphic.FaceBounds bounds) {
+        if(null != bitmap) {
+            int x = (int) bounds.getLeft() < 0 ? 0 : (int) bounds.getLeft();
+            int y = (int) bounds.getTop() > bitmap.getHeight() ? bitmap.getHeight() : (int) bounds.getTop();
+            if(y < 0) {
+                y = 0;
+            }
+            int width = bounds.getWidth() - 150;
+            int height = bounds.getHeight() - 100;
+            //System.out.printf(String.format("\n1.%s %s %s %s\n", x, y, width, height));
+            if (x + width > bitmap.getWidth()) {
+                width = bitmap.getWidth() - x;
+            }
+            if (y + height > bitmap.getHeight()) {
+                height = bitmap.getHeight() - y;
+            }
+            //System.out.printf(String.format("\n2. %s %s %s %s\n", x, y, width, height));
+            return Bitmap.createBitmap(bitmap, x, y, width, height);
+        }
+        return null;
     }
 
 }
